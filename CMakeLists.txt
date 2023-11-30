@@ -18,14 +18,11 @@ option(YAML_CPP_BUILD_TOOLS FALSE)
 option(YAML_CPP_INSTALL FALSE)
 
 add_subdirectory(vendor/glad)
-add_subdirectory(vendor/yaml-cpp)
-add_subdirectory(vendor/glm)
-
 include_directories(vendor/glad/include)
-include_directories(vendor/stb)
 include_directories(vendor/argumentum/include)
 
 find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
 
 # Sanitizers (linux only)
 set(ADDRESS_SANITIZE FALSE CACHE BOOL "Enables Address Sanitizer")
@@ -82,38 +79,40 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/download.cmake
   "file(DOWNLOAD https://lodev.org/cgtutor/files/wolftex.zip ${CMAKE_CURRENT_BINARY_DIR}/wolftex.zip)"
 )
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/extract.cmake 
-  "file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/wolftex.zip DESTINATION ${CMAKE_CURRENT_BINARY_DIR})"
-)
+  "file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/wolftex.zip DESTINATION ${CMAKE_CURRENT_BINARY_DIR})")
 
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/raycastergl/res/textures/eagle.png
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/raycastergl/pics/eagle.png
   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/download.cmake
   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/extract.cmake
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  VERBATIM
-)
-add_custom_target(textures DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/raycastergl/res/textures/eagle.png)
+  VERBATIM)
+
+add_custom_target(textures DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/raycastergl/pics/eagle.png)
 
 set_target_properties(textures
   PROPERTIES
-  ADDITIONAL_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/res/textures
-)
+  ADDITIONAL_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/pics)
+
+set_property(
+  TARGET textures
+  APPEND
+  PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/wolftex.zip) 
 
 add_executable(raycastergl
-    ${RAYCASTERGL_HEADERS}
-    ${RAYCASTERGL_SOURCES}
-    ${RAYCASTERGL_SHADERS}
-)
+  ${RAYCASTERGL_HEADERS}
+  ${RAYCASTERGL_SOURCES}
+  ${RAYCASTERGL_SHADERS})
+  
 add_dependencies(raycastergl textures)
 
 target_link_libraries(raycastergl
-    GLAD
-    yaml-cpp
-    glm::glm
-    glfw
+  GLAD
+  yaml-cpp
+  glm::glm
+  glfw
 )
 
 add_custom_target(
     copy_resources ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/raycastergl/res $<TARGET_FILE_DIR:${PROJECT_NAME}>/res
-)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/raycastergl/res $<TARGET_FILE_DIR:${PROJECT_NAME}>/res)

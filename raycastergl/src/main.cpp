@@ -6,7 +6,7 @@
 #endif
 #include <cmath>
 #include <iostream>
-#include <stb_image.h>
+#include <stb/stb_image.h>
 #include <glm/vec2.hpp>
 #include <glm/geometric.hpp>
 #include <arguments.hpp>
