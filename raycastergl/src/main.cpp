@@ -1,9 +1,5 @@
 #include <glad/glad.h>
-#ifdef WIN32
 #include <GLFW/glfw3.h>
-#else
-#include <GLFW/glfw3.h>
-#endif
 #include <cmath>
 #include <iostream>
 #include <stb/stb_image.h>
@@ -228,6 +224,7 @@ int main(int argc, const char* const argv[]) {
         std::cout << "\rFramebuffer set to (" << size.x << ", " << size.y
             << "), position (" << pos.x << ", " << pos.y << ")" << std::endl;
         glViewport(pos.x, pos.y, size.x, size.y);
+	// Update size of screen
         raycasterComputeProgram.use();
         raycasterComputeProgram.setUniform("screenSize", size.x, size.y);
         raycasterDrawProgram.use();
@@ -336,9 +333,16 @@ int main(int argc, const char* const argv[]) {
 
         // this code writes the raycaster result 2.0 into a file (not so slow as the texture version)
         // raycastResultBuffer._writeContentsToFile("yes.bin");
-
+#define USE_VSYNC 1
+#ifdef USE_VSYNC 
         glfwSwapInterval(arguments.vsync);
+#else
+        glfwSwapInterval(0);
+#endif
         glfwSwapBuffers(window);
+#ifndef USE_VSYNC
+	glFinish();
+#endif
         glfwPollEvents();
 
         const float currentTime = glfwGetTime();
